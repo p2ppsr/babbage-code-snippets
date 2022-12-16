@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="BabbageSDK.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <button id="GetCertificateButton" onclick="onGetCertificateClick()" style="visibility: hidden;">Get Certificate</button>
+    <h4 id="status"></h4>
+
+    <!--Setup Get Babbage dropdown menu-->
+    <nav role="navigation" id="GetBabbageButton" style="visibility: hidden;">
+      <ul>
+        <li><a href="#" aria-haspopup="true">Get Babbage</a>
+          <ul class="dropdown" aria-label="submenu">
+            <li><a href="https://projectbabbage.com/desktop/res/Babbage%20Desktop.dmg">Install (macOS)</a></li> 
+            <li><a href="https://projectbabbage.com/desktop/res/Babbage%20Desktop.exe">Install (Windows)</a></li>
+            <li><a href="https://projectbabbage.com/desktop/res/Babbage%20Desktop.snap">Install (Linux snap)</a></li>
+            <li><a href="https://projectbabbage.com/desktop/res/Babbage%20Desktop.AppImage">Install (Linux AppImage)</a></li>
+            <li><a href="https://projectbabbage.com/docs/dev-downloads">Stageline & Devline</a></li>
+          </ul>
+        </li>
+      </ul>
+    </nav>
+
+    <script>
+        const config = {
+          certificateType: 'AGfk/WrT1eBDXpz3mcw386Zww2HmqcIn3uY6x4Af1eo=',
+          fieldObject: {
+            cool: 'true'
+          },
+          certifierUrl: 'https://staging-coolcert.babbage.systems',
+          certifierPublicKey: '0447431387e513406817e5e8de00901f8572759012f5ed89b33857295bcc2651f890b13455f0b59c7b75897033e7ae260834a2397e7c316a0fd21e35e8d81ddd34'
+        }
+        
+        // ---- Edit the config above this line ----
+        const init = async () => {
+          try {
+            // Check if the user is authenticated
+            await window.BabbageSDK.getVersion()
+            document
+              .getElementById('GetBabbageButton')
+              .style.visibility = 'hidden'
+            document
+              .getElementById('GetCertificateButton')
+              .style.visibility = 'visible'
+          } catch (e) {
+            document
+              .getElementById('GetBabbageButton')
+              .style.visibility = 'visible'
+            document
+              .getElementById('GetCertificateButton')
+              .style.visibility = 'hidden'
+          }
+        }
+        init()
+        // Request a certificate
+        const onGetCertificateClick = async () => {
+          // Search for matching certificates issued to the current user
+          let matchingCertificates = await window.BabbageSDK.getCertificates({
+            certifiers: [config.certifierPublicKey], 
+            types: {[config.certificateType]: [Object.keys(config.fieldObject)]}
+          })
+          // Check if a match was found, or if a new one should be created
+          if (matchingCertificates.length !== 0) {
+            document.getElementById('status').innerText = 'You already have a matching certificate!'
+          } else {
+            const certificate = await window.BabbageSDK.createCertificate(config)
+            document.getElementById('status').innerText = `Success! Certificate created for: ${certificate.subject}`
+          }   
+        }
+        </script>
+        <style>
+        #GetCertificateButton {
+            background-color: #222;
+            border-radius: 4px;
+            border-style: none;
+            box-sizing: border-box;
+            color: #fff;
+            cursor: pointer;
+            display: inline-block;
+            font-family: "monospace";
+            font-size: 16px;
+            font-weight: 700;
+            line-height: 1.5;
+            margin: 0;
+            max-width: none;
+            min-height: 44px;
+            min-width: 10px;
+            outline: none;
+            overflow: hidden;
+            padding: 9px 20px 8px;
+            position: relative; 
+            text-align: center;
+            text-transform: none;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+            /* width: 100%; */
+        }
+        #GetCertificateButton:hover,
+        #GetCertificateButton:focus,
+        /* #GetBabbageButton:hover,
+        #GetBabbageButton:focus {
+            opacity: .9;
+        } */
+        </style>
+</body>
+</html>
